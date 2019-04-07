@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>商品展示</title>
+    <link href="/js/bootstrap-3.3.7-dist/css/bootstrap.min.css" rel="stylesheet">
+
+</head>
+<body>
+<h1>你好，欢迎来到秦莞尔(http)
+    <a href="/user/addUser.html" class="btn btn-info">
+    <span class="glyphicon glyphicon-plus"></span>
+    用户注册</a>
+</button>
+</h1>
+<div class="container-fluid">
+    <div class="row" id="view">
+    </div>
+</div>
+
+<script type="text/javascript" src="/js/jquery-3.3.1.js"></script>
+
+<script src="/js/bootstrap-3.3.7-dist/js/bootstrap.js"></script>
+
+<script>
+
+    $.ajax({
+        url: "/product/selectProductList.jhtml",
+        type: "post",
+        success: function (request) {
+            if (request.code == 200) {
+                var message = request.data;
+                for (var i = 0; i < message.length; i++) {
+                    var v_product = message[i];
+                    var view = " <div class=\"col-sm-6 col-md-4\">\n" +
+                        "            <div class=\"thumbnail\">\n" +
+                        "                <img src=\""+v_product.imgPath+"\" width='100px'>\n" +
+                        "                <div class=\"caption\">\n" +
+                        "                    <h3>"+v_product.productName+"</h3>\n" +
+                        "                    <p>"+v_product.productPrice+"</p>\n" +
+                        "                    <p><a href=\"#\" class=\"btn btn-primary\" role=\"button\">查看</a>\n" +
+                        "                    <a href=\"#\" class=\"btn btn-default\" role=\"button\">添加到购物车</a></p>\n" +
+                        "                </div>\n" +
+                        "            </div>\n" +
+                        "        </div>"
+
+                    $("#view").append(view);
+                }
+            }
+        }
+    })
+</script>
+
+</body>
+</html>

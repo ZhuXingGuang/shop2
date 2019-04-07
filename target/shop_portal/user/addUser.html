@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>用户添加</title>
+
+    <link href="/js/DataTables-1.10.18/css/jquery.dataTables.min.css" rel="stylesheet">
+
+    <link href="/js/bootstrap-3.3.7-dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link href="/js/DataTables-1.10.18/css/dataTables.bootstrap.min.css" rel="stylesheet">
+
+    <link href="/js/bootstrap-datetimepicker-master/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
+</head>
+<body>
+
+<div id="page-content-wrapper ">
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-12">
+                <form class="form-horizontal" role="form" method="post" id="user">
+                    <h2 class="sub-header">添加用户</h2>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">用户账号</label>
+                        <div class="col-sm-3">
+                            <input class="form-control" type="text" id="userName"/>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">用户密码</label>
+                        <div class="col-sm-3">
+                            <input class="form-control" type="password" id="password"/>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">确认密码</label>
+                        <div class="col-sm-3">
+                            <input class="form-control" type="password" id="newpwd"/>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">手机号码</label>
+                        <div class="col-sm-3">
+                            <input class="form-control" type="text" id="userPhone"/>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">电子邮件</label>
+                        <div class="col-sm-3">
+                            <input class="form-control" type="text" id="userEmile"/>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">用户生日</label>
+                        <div class="col-sm-3">
+                            <input class="form_datetime form-control" type="text" id="userBirthday"/>
+                        </div>
+                    </div>
+                    <div class="form-group">
+
+                        <label class="col-md-2 control-label">地区</label>
+
+                        <div class="col-md-2">
+                            <select id="province" onchange="searchCity(this)" class="form-control">
+                                <option value='-1'>请选择</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-2">
+                            <select id="city" onchange="searchCountry(this)" class="form-control">
+                                <option value='-1'>请选择</option>
+                             </select>
+                        </div>
+                        
+                        <div class="col-md-2">
+                            <select id="county" class="form-control">
+                                    <option value='-1'>请选择</option>
+                             </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">验证码</label>
+                        <div class="col-sm-2">
+                            <input class="form-control" type="text" id="phoneCode"/>
+                        </div>
+                             <a class="btn btn-warning" onclick = "getCode()">点击获取</a>
+                    </div>
+                    <div class="col-md-2 col-md-offset-2">
+                        <button class="btn btn-primary" type="button" onclick="submitUser()">
+                            <i class="glyphicon glyphicon-ok"></i>
+                            注册
+                        </button>
+                        <button class="btn btn-default" type="reset">
+                            <i class="glyphicon glyphicon-refresh"></i>
+                            重置
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript" src="/js/jquery-3.3.1.js"></script>
+
+<script type="text/javascript" src="/js/md5.js"></script>
+
+<script src="/js/bootstrap-3.3.7-dist/js/bootstrap.js"></script>
+
+<script type="text/javascript" src="/js/DataTables-1.10.18/js/jquery.dataTables.min.js"></script>
+
+<script type="text/javascript" src="/js/DataTables-1.10.18/js/dataTables.bootstrap.min.js"></script>
+
+<script type="text/javascript"
+        src="/js/bootstrap-datetimepicker-master/js/bootstrap-datetimepicker.js"
+        charset="UTF-8"></script>
+
+<script type="text/javascript"
+        src="/js/bootstrap-datetimepicker-master/js/locales/bootstrap-datetimepicker.zh-CN.js"
+        charset="UTF-8"></script>
+
+<!--bootbox-->
+<script src="/js/bootbox/bootbox.min.js"></script>
+
+<script>
+
+    $(function () {
+
+        initArea(1);
+    })
+
+    $(".form_datetime").datetimepicker({
+        format: "yyyy-mm-dd 00:00:00",
+        language: 'zh-CN',
+        weekStart: 1,
+        todayBtn: 1,//显示‘今日’按钮
+        autoclose: 1,
+        todayHighlight: 1,
+        startView: 2, //这里就设置了默认视图为年视图
+        minView: 2, //设置最小视图为年视图
+        clearBtn: true,//清除文本框按钮
+        forceParse: 0,
+        orientation: 'bottom',
+    });
+
+    function initArea(id) {
+
+        $.ajax({
+            url: "/area/selectCity.jhtml",
+            data: {"id": id},
+            dataType: "json",
+            success: function (result) {
+                if (result.code == 200) {
+                    var provinceInfo = result.data;
+                    var optionStr = "<option value='-1'>请选择</option>";
+                    for (var i = 0; i < provinceInfo.length; i++) {
+                        optionStr += "<option value='" + provinceInfo[i].id + "' " +
+                            "attr_areaName = '"+provinceInfo[i].areaName+"'>" +
+                            "" + provinceInfo[i].areaName + "</option>"
+                    }
+                    $("#province").html(optionStr);
+                }
+            }
+        })
+    }
+
+    var v_cityid;
+
+    function searchCity(obj) {
+        var city_id = $(obj).val()
+
+        $.ajax({
+            url: "/area/selectCity.jhtml",
+            data: {"id": city_id},
+            dataType: "json",
+            success: function (data) {
+                if (data.code == 200) {
+                    var optionStr;
+                    var provinceInfo = data.data;
+                    for (var i = 0; i < provinceInfo.length; i++) {
+                        optionStr += "<option value='" + provinceInfo[i].id + "' " +
+                            "attr_areaName = '"+provinceInfo[i].areaName+"'>" +
+                            "" + provinceInfo[i].areaName + "</option>"
+                    }
+                    $("#city").html(optionStr)
+                    v_cityid = provinceInfo[0].id
+                    searchCountry();
+                }
+            }
+        })
+    }
+
+    function searchCountry(obj) {
+        var country_id;
+        if (typeof(obj) != "undefined")
+        {
+            country_id = $(obj).val();
+        }else{
+            country_id = v_cityid;
+        }
+        $.ajax({
+            url: "/area/selectCity.jhtml",
+            data: {
+                "id": country_id
+            },
+            dataType: "json",
+            success: function (data) {
+                var optionStr;
+                if (data.code == 200) {
+                    var provinceInfo = data.data;
+                    for (var i = 0; i < provinceInfo.length; i++) {
+                        optionStr += "<option value='" + provinceInfo[i].id + "'" +
+                            " attr_areaName = '"+provinceInfo[i].areaName+"'>" +
+                            "" + provinceInfo[i].areaName + "</option>"
+                    }
+                    $("#county").html(optionStr);
+
+                }
+            }
+        })
+    }
+
+    //验证码
+    function getCode() {
+
+        var v_userPhone = $("#userPhone").val();
+
+        if(v_userPhone != ""){
+
+            $.ajax({
+                url: "/sms/sendSms.jhtml",
+                data: {"phoneNumber":v_userPhone},
+                dataType: "json",
+                type:"post",
+                success: function (result) {
+                    console.log(result);
+                        bootbox.alert({
+                            message: "" + result.msg + "！！！",
+                            backdrop: true,
+                            size: 'small',
+                        });
+                }
+            })
+        }else{
+            alert("请完善手机号码")
+        }
+    }
+
+    //添加用户
+    function submitUser() {
+
+        var v_userName = $("#userName").val();
+
+        var v_password = $("#password").val();
+
+        var v_newpwd = $("#newpwd").val();
+
+        var v_userPhone = $("#userPhone").val();
+
+        var v_userEmile = $("#userEmile").val();
+
+        var v_userBirthday = $("#userBirthday").val();
+
+        var v_province = $("#province").val();
+
+        var v_city = $("#city").val();
+
+        var v_county = $("#county").val();
+
+        var v_phoneCode = $("#phoneCode").val();
+
+        var v_provinceName = $("#province").find("option[value='"+v_province+"']").attr("attr_areaName");
+
+        var v_cityName = $("#city").find("option[value='"+v_city+"']").attr("attr_areaName");
+
+        var v_countyName = $("#county").find("option[value='"+v_county+"']").attr("attr_areaName");
+
+        var v_areaName = v_provinceName+v_cityName+v_countyName;
+
+        if (v_userName != "" && v_password != "" && v_newpwd != "" && v_userPhone != "" && v_userEmile != ""
+
+        && v_province != -1 && v_city != -1 && v_county != -1 && v_phoneCode != "") {
+
+            if (v_password != v_newpwd) {
+
+                bootbox.alert({
+                    message: "两次密码不相同！！！",
+                    backdrop: true,
+                    size: 'small',
+                });
+
+            } else {
+
+                var v_md5Pwd = hex_md5(v_password);
+
+                $.ajax({
+                    url: "/user/addMember.jhtml",
+                    data: {
+                        "userName": v_userName, "passWord": v_md5Pwd,
+
+                        "userPhone": v_userPhone, "userEmile": v_userEmile,"areaName":v_areaName,
+
+                        "userBirthday": v_userBirthday, "provinceId": v_province,
+
+                        "cityId":v_city, "countyId":v_county,"phoneCode":v_phoneCode
+                    },
+                    dataType: "json",
+                    type:"post",
+                    success: function (result) {
+
+                        console.log(result);
+
+                        if (result.code == 200) {
+
+                            alert(result.msg);
+
+                           document.getElementById("user").reset();
+
+                        } else {
+                            bootbox.alert({
+                                message: "" + result.msg + "！！！",
+                                backdrop: true,
+                                size: 'small',
+                            });
+                        }
+                    }
+                })
+            }
+        } else {
+
+            bootbox.alert({
+                message: "请输入完整的信息！！！",
+                backdrop: true,
+                size: 'small',
+            });
+        }
+    }
+
+
+</script>
+</body>
+</html>
